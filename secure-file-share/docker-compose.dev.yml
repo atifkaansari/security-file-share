@@ -1,15 +1,26 @@
 services:
+  # Development Overrides
   api:
     build:
-      context: .
-      dockerfile: Dockerfile
       target: development
+    command: npm run start:dev
     environment:
       - NODE_ENV=development
     volumes:
-      - .:/app
+      - ./api:/app
       - /app/node_modules
-    command: npm run start:dev
-    # Expose port for debugging if needed
-    ports:
-      - '9229:9229'
+
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      target: development
+    # Next.js dev server usage typically requires mounting source code
+    # But since we use a multi-stage Dockerfile optimized for prod, 
+    # for true dev experience with hot-reload, we might run npm run dev inside.
+    # Here we simplify by using the same image but could override command if needed.
+    # For better DX, we usually run web locally with npm run dev or mount volume.
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev"

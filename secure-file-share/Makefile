@@ -1,8 +1,11 @@
-.PHONY: dev-up dev-down dev-logs prod-up prod-down prod-logs build
+.PHONY: dev-up dev-down dev-logs prod-up prod-down prod-logs build migrate studio shell
 
 # Development
 dev-up:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --build
+
+dev-start:
+	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
 
 dev-down:
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
