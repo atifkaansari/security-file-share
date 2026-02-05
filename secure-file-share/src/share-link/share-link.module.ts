@@ -1,0 +1,18 @@
+import { Module, forwardRef } from '@nestjs/common';
+import { ShareLinkService } from './share-link.service';
+import { ShareLinkController } from './share-link.controller';
+import { FileModule } from '../file/file.module';
+import { AccessLogModule } from '../access-log/access-log.module';
+import { SocketModule } from '../socket/socket.module';
+
+@Module({
+    imports: [
+        FileModule,
+        forwardRef(() => AccessLogModule),
+        forwardRef(() => SocketModule),
+    ],
+    controllers: [ShareLinkController],
+    providers: [ShareLinkService],
+    exports: [ShareLinkService],
+})
+export class ShareLinkModule { }

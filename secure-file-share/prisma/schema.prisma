@@ -1,0 +1,101 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum AccessAction {
+  VIEW
+  DOWNLOAD
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  files File[]
+
+  @@map("users")
+}
+
+model File {
+  id           String   @id @default(uuid())
+  originalName String
+  mimeType     String
+  size         BigInt
+  s3Key        String   @unique
+  uploaderId   String?
+  packageId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  uploader   User?       @relation(fields: [uploaderId], references: [id], onDelete: SetNull)
+  package    Package?    @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  shareLinks ShareLink[]
+
+  @@index([uploaderId])
+  @@index([packageId])
+  @@map("files")
+}
+
+model ShareLink {
+  id                   String    @id @default(uuid())
+  token                String    @unique
+  fileId               String
+  password             String?   // bcrypt hash
+  expireAt             DateTime?
+  downloadLimit        Int?
+  currentDownloadCount Int       @default(0)
+  isActive             Boolean   @default(true)
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  file       File        @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  accessLogs AccessLog[]
+
+  @@index([token])
+  @@index([fileId])
+  @@index([expireAt])
+  @@map("share_links")
+}
+
+model AccessLog {
+  id        String       @id @default(uuid())
+  linkId    String
+  action    AccessAction
+  ip        String?
+  userAgent String?
+  createdAt DateTime     @default(now())
+
+  link ShareLink @relation(fields: [linkId], references: [id], onDelete: Cascade)
+
+  @@index([linkId])
+  @@index([createdAt])
+  @@map("access_logs")
+}
+
+model Package {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  files File[]
+
+  @@map("packages")
+}
