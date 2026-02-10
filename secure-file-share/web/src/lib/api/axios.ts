@@ -11,7 +11,7 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
     if (token) {
         config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,8 +24,10 @@ api.interceptors.response.use(
         // Handle 401 Unauthorized
         if (error.response?.status === 401) {
             if (typeof window !== 'undefined') {
-                localStorage.removeItem('token');
-                // window.location.href = '/admin/login'; // Optional: redirect to login
+                localStorage.removeItem('auth_token');
+                if (window.location.pathname.startsWith('/admin')) {
+                    window.location.href = '/admin/login';
+                }
             }
         }
         return Promise.reject(error);

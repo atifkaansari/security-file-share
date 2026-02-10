@@ -17,19 +17,16 @@ export class FileController {
     constructor(private readonly fileService: FileService) { }
 
     @Post('init-upload')
-    @UseGuards(AuthGuard('jwt'))
     async initUpload(@Body() dto: InitUploadDto, @Request() req) {
         return this.fileService.initUpload(dto, req.user?.id);
     }
 
     @Post('complete-upload')
-    @UseGuards(AuthGuard('jwt'))
     async completeUpload(@Body() dto: CompleteUploadDto) {
         return this.fileService.completeUpload(dto);
     }
 
     @Post('abort-upload')
-    @UseGuards(AuthGuard('jwt'))
     async abortUpload(@Body() dto: AbortUploadDto) {
         return this.fileService.abortUpload(dto);
     }

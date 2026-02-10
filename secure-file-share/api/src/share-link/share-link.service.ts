@@ -10,6 +10,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { S3Service } from '../file/s3.service';
 import { AccessLogService } from '../access-log/access-log.service';
 import { SocketGateway } from '../socket/socket.gateway';
+import { EmailService } from '../email/email.service';
 import { CreateShareLinkDto, VerifyLinkDto } from './dto';
 
 @Injectable()
@@ -19,6 +20,7 @@ export class ShareLinkService {
         private readonly s3Service: S3Service,
         private readonly accessLogService: AccessLogService,
         private readonly socketGateway: SocketGateway,
+        private readonly emailService: EmailService,
     ) { }
 
     async create(dto: CreateShareLinkDto) {
@@ -166,6 +168,24 @@ export class ShareLinkService {
             ip,
             userAgent,
         });
+
+        // Send email notification to uploader
+        if (shareLink.file.uploaderId) {
+            const uploader = await this.prisma.user.findUnique({
+                where: { id: shareLink.file.uploaderId },
+                select: { email: true },
+            });
+
+            if (uploader) {
+                await this.emailService.sendDownloadNotification({
+                    to: uploader.email,
+                    fileName: shareLink.file.originalName,
+                    downloadedAt: new Date(),
+                    ip,
+                    userAgent,
+                });
+            }
+        }
 
         // Get pre-signed URL
         const downloadUrl = await this.s3Service.getDownloadSignedUrl(

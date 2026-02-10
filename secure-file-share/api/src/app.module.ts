@@ -9,6 +9,7 @@ import { AccessLogModule } from './access-log/access-log.module';
 import { PackageModule } from './package/package.module';
 import { SocketModule } from './socket/socket.module';
 import { JobsModule } from './jobs/jobs.module';
+import { AdminModule } from './admin/admin.module';
 import { AppController } from './app.controller';
 import configuration from './config/configuration';
 
@@ -32,6 +33,7 @@ import configuration from './config/configuration';
     PackageModule,
     SocketModule,
     JobsModule,
+    AdminModule,
   ],
   controllers: [AppController],
 })
